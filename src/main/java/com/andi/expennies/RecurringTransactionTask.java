@@ -19,7 +19,7 @@ public class RecurringTransactionTask {
     @Autowired
     TransactionRepository transactionRepository;
 
-    @Scheduled(fixedRate = 60000) // Run daily at midnight
+    @Scheduled(cron = "0 59 23 * * ?") // Run daily just before midnight
     public void generateRecurringExpenses() {
         // Fetch upcoming recurring expenses
         List<Transaction> recurringExpenses = transactionRepository.getPaymentsScheduledForToday();
