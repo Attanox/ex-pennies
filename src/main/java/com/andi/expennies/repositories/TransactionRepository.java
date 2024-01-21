@@ -20,4 +20,5 @@ public interface TransactionRepository {
 
     List<Transaction> getPaymentsScheduledForToday();
 
+    List<Transaction> searchByFullText(Integer userId, Integer categoryId, String term);
 }

@@ -27,15 +27,6 @@ public class TransactionResource {
         return new ResponseEntity<>(transactions, HttpStatus.OK);
     }
 
-    @GetMapping("/{transactionId}")
-    public ResponseEntity<Transaction> getTransactionById(HttpServletRequest request,
-                                                          @PathVariable("categoryId") Integer categoryId,
-                                                          @PathVariable("transactionId") Integer transactionId) {
-        int userId = (Integer) request.getAttribute("userId");
-        Transaction transaction = transactionService.fetchTransactionById(userId, categoryId, transactionId);
-        return new ResponseEntity<>(transaction, HttpStatus.OK);
-    }
-
     @PostMapping("/")
     public ResponseEntity<Map<String, Boolean>> createTransaction(
             HttpServletRequest request,
@@ -61,6 +52,23 @@ public class TransactionResource {
         Map<String, Boolean> map = new HashMap<>();
         map.put("success", true);
         return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
+    @GetMapping("/{transactionId}")
+    public ResponseEntity<Transaction> getTransactionById(HttpServletRequest request,
+                                                          @PathVariable("categoryId") Integer categoryId,
+                                                          @PathVariable("transactionId") Integer transactionId) {
+        int userId = (Integer) request.getAttribute("userId");
+        Transaction transaction = transactionService.fetchTransactionById(userId, categoryId, transactionId);
+        return new ResponseEntity<>(transaction, HttpStatus.OK);
+    }
+    @GetMapping("/search/{term}")
+    public ResponseEntity<List<Transaction>> searchByFullText(HttpServletRequest request,
+                                                          @PathVariable("categoryId") Integer categoryId,
+                                                          @PathVariable("term") String term) {
+        int userId = (Integer) request.getAttribute("userId");
+        List<Transaction> transactions = transactionService.searchByFullText(userId, categoryId, term);
+        return new ResponseEntity<>(transactions, HttpStatus.OK);
     }
     @PutMapping("/{transactionId}")
     public ResponseEntity<Map<String, Boolean>> updateTransaction(

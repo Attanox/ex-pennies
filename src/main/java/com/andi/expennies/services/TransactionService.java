@@ -10,6 +10,8 @@ import java.util.List;
 public interface TransactionService {
     List<Transaction> fetchAllTransactions(Integer userId, Integer categoryId);
 
+    List<Transaction> searchByFullText(Integer userId, Integer categoryId, String term);
+
     Transaction fetchTransactionById(Integer userId, Integer categoryId, Integer transactionId) throws EpResourceNotFoundException;
 
     void addTransaction(Integer userId, Integer categoryId, Double amount, String note, Long transactionDate, Boolean isRecurring, RecurrenceType recurrenceType) throws EpBadRequestException;
@@ -17,5 +19,6 @@ public interface TransactionService {
     void updateTransaction(Integer userId, Integer categoryId, Integer transactionId, Double amount, String note, Long transactionDate, Boolean isRecurring, RecurrenceType recurrenceType) throws EpBadRequestException;
 
     void removeTransaction(Integer userId, Integer categoryId, Integer transactionId) throws EpResourceNotFoundException;
+
 
 }

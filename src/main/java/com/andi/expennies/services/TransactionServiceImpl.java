@@ -23,6 +23,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    public List<Transaction> searchByFullText(Integer userId, Integer categoryId, String term) {
+        return transactionRepository.searchByFullText(userId, categoryId, term);
+    }
+
+    @Override
     public Transaction fetchTransactionById(Integer userId, Integer categoryId, Integer transactionId) throws EpResourceNotFoundException {
         return transactionRepository.findById(userId, categoryId, transactionId);
     }

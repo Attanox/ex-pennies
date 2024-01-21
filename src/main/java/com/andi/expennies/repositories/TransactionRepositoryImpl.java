@@ -79,6 +79,13 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<Transaction> searchByFullText(Integer userId, Integer categoryId, String term) {
+        final String sql = "SELECT * FROM EP_TRANSACTIONS WHERE CATEGORY_ID = ? AND note ILIKE ?";
+
+        return jdbcTemplate.query(sql, new Object[]{categoryId, "%" + term + "%"}, transactionRowMapper);
+    }
+
     private boolean isPaymentToday(Transaction transaction, LocalDate today) {
         Long transactionEpochTime = transaction.getTransactionDate();
 
