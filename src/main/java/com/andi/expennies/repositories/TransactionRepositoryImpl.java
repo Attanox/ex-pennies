@@ -18,24 +18,18 @@ import java.util.stream.Collectors;
 
 @Repository
 public class TransactionRepositoryImpl implements TransactionRepository {
-
-    private static final String SQL_FIND_ALL = "SELECT * FROM EP_TRANSACTIONS WHERE USER_ID = ? AND CATEGORY_ID = ?";
-    private static final String SQL_FIND_ALL_ACROSS = "SELECT * FROM EP_TRANSACTIONS";
-    private static final String SQL_FIND_BY_ID = "SELECT * FROM EP_TRANSACTIONS WHERE USER_ID = ? AND CATEGORY_ID = ? AND TRANSACTION_ID = ?";
-    private static final String SQL_CREATE = "INSERT INTO EP_TRANSACTIONS (TRANSACTION_ID, CATEGORY_ID, USER_ID, AMOUNT, NOTE, TRANSACTION_DATE, IS_RECURRING, RECURRENCE_TYPE) VALUES(NEXTVAL('EP_TRANSACTIONS_SEQ'), ?, ?, ?, ?, ?, ?, ?)";
-    private static final String SQL_UPDATE = "UPDATE EP_TRANSACTIONS SET AMOUNT = ?, NOTE = ?, TRANSACTION_DATE = ?, IS_RECURRING = ?, RECURRENCE_TYPE = ? WHERE USER_ID = ? AND CATEGORY_ID = ? AND TRANSACTION_ID = ?";
-    private static final String SQL_DELETE = "DELETE FROM EP_TRANSACTIONS WHERE USER_ID = ? AND CATEGORY_ID = ? AND TRANSACTION_ID = ?";
-
     @Autowired
     JdbcTemplate jdbcTemplate;
 
     @Override
     public List<Transaction> findAll(Integer userId, Integer categoryId) {
+        final String SQL_FIND_ALL = "SELECT * FROM EP_TRANSACTIONS WHERE USER_ID = ? AND CATEGORY_ID = ?";
         return jdbcTemplate.query(SQL_FIND_ALL, new Object[]{userId, categoryId}, transactionRowMapper);
     }
 
     @Override
     public Transaction findById(Integer userId, Integer categoryId, Integer transactionId) throws EpResourceNotFoundException {
+        final String SQL_FIND_BY_ID = "SELECT * FROM EP_TRANSACTIONS WHERE USER_ID = ? AND CATEGORY_ID = ? AND TRANSACTION_ID = ?";
         try {
             return jdbcTemplate.queryForObject(SQL_FIND_BY_ID, new Object[]{userId, categoryId, transactionId}, transactionRowMapper);
         } catch (Exception e) {
@@ -45,21 +39,37 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 
     @Override
     public void create(Integer userId, Integer categoryId, Double amount, String note, Long transactionDate, Boolean isRecurring, RecurrenceType recurrenceType) throws EpBadRequestException {
-        jdbcTemplate.update(SQL_CREATE, categoryId, userId, amount, note, transactionDate, isRecurring, recurrenceType.name());
+        final String SQL_CREATE = "INSERT INTO EP_TRANSACTIONS (TRANSACTION_ID, CATEGORY_ID, USER_ID, AMOUNT, NOTE, TRANSACTION_DATE, IS_RECURRING, RECURRENCE_TYPE) VALUES(NEXTVAL('EP_TRANSACTIONS_SEQ'), ?, ?, ?, ?, ?, ?, ?)";
+        try {
+            jdbcTemplate.update(SQL_CREATE, categoryId, userId, amount, note, transactionDate, isRecurring, recurrenceType.name());
+        } catch (Exception e) {
+            throw new EpBadRequestException("Could not update transaction");
+        }
     }
 
     @Override
     public void update(Integer userId, Integer categoryId, Integer transactionId, Double amount, String note, Long transactionDate, Boolean isRecurring, RecurrenceType recurrenceType) throws EpBadRequestException {
-        jdbcTemplate.update(SQL_UPDATE, amount, note, transactionDate, isRecurring, recurrenceType.name(), userId, categoryId, transactionId);
+        final String SQL_UPDATE = "UPDATE EP_TRANSACTIONS SET AMOUNT = ?, NOTE = ?, TRANSACTION_DATE = ?, IS_RECURRING = ?, RECURRENCE_TYPE = ? WHERE USER_ID = ? AND CATEGORY_ID = ? AND TRANSACTION_ID = ?";
+        try {
+            jdbcTemplate.update(SQL_UPDATE, amount, note, transactionDate, isRecurring, recurrenceType.name(), userId, categoryId, transactionId);
+        } catch (Exception e) {
+            throw new EpBadRequestException("Could not update transaction");
+        }
     }
 
     @Override
     public void removeById(Integer userId, Integer categoryId, Integer transactionId) throws EpResourceNotFoundException {
-        jdbcTemplate.update(SQL_DELETE, userId, categoryId, transactionId);
+        final String SQL_DELETE = "DELETE FROM EP_TRANSACTIONS WHERE USER_ID = ? AND CATEGORY_ID = ? AND TRANSACTION_ID = ?";
+        try {
+            jdbcTemplate.update(SQL_DELETE, userId, categoryId, transactionId);
+        } catch (Exception e) {
+            throw new EpBadRequestException("Could not update transaction");
+        }
     }
 
     @Override
     public List<Transaction> getPaymentsScheduledForToday() {
+        final String SQL_FIND_ALL_ACROSS = "SELECT * FROM EP_TRANSACTIONS";
         LocalDate today = LocalDate.now();
 
         List<Transaction> allTransactionsAcross = jdbcTemplate.query(SQL_FIND_ALL_ACROSS, new Object[]{}, transactionRowMapper);

@@ -21,26 +21,24 @@ public class AuthFilter extends GenericFilterBean {
         HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
 
         String authHeader = httpRequest.getHeader("Authorization");
-        if(authHeader != null) {
-            String[] authHeaderArr = authHeader.split("Bearer ");
-            if(authHeaderArr.length > 1 && authHeaderArr[1] != null) {
-                String token = authHeaderArr[1];
-                try {
-                    Claims claims = Jwts.parser().setSigningKey(Constants.API_SECRET_KEY)
-                            .build().parseClaimsJws(token).getBody();
-                    httpRequest.setAttribute("userId", Integer.parseInt(claims.get("userId").toString()));
+        if(authHeader == null) {
+            httpResponse.sendError(HttpStatus.FORBIDDEN.value(), "Authorization token must be provided");
+            return;
+        }
+        String[] authHeaderArr = authHeader.split("Bearer ");
+        if(authHeaderArr.length <= 1 || authHeaderArr[1] == null) {
+            httpResponse.sendError(HttpStatus.FORBIDDEN.value(), "Authorization token must be Bearer [token]");
+            return;
+        }
+        String token = authHeaderArr[1];
+        try {
+            Claims claims = Jwts.parser().setSigningKey(Constants.API_SECRET_KEY)
+                    .build().parseClaimsJws(token).getBody();
+            httpRequest.setAttribute("userId", Integer.parseInt(claims.get("userId").toString()));
 //                    !!! FOR TESTING WITHOUT AUTHORIZATION !!!
 //                    httpRequest.setAttribute("userId", 1);
-                }catch (Exception e) {
-                    httpResponse.sendError(HttpStatus.FORBIDDEN.value(), "invalid/expired token");
-                    return;
-                }
-            } else {
-                httpResponse.sendError(HttpStatus.FORBIDDEN.value(), "Authorization token must be Bearer [token]");
-                return;
-            }
-        } else {
-            httpResponse.sendError(HttpStatus.FORBIDDEN.value(), "Authorization token must be provided");
+        } catch (Exception e) {
+            httpResponse.sendError(HttpStatus.FORBIDDEN.value(), "invalid/expired token");
             return;
         }
         filterChain.doFilter(servletRequest, servletResponse);

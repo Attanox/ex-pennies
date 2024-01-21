@@ -17,10 +17,6 @@ import java.sql.Statement;
 @Repository
 public class UserRepositoryImpl implements UserRepository {
 
-    private static final String SQL_CREATE = "INSERT INTO EP_USERS(USER_ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD) values(NEXTVAL('EP_USERS_SEQ'), ?, ?, ?, ?)";
-    private static final String SQL_COUNT_BY_EMAIL = "SELECT COUNT(*) FROM EP_USERS WHERE EMAIL = ?";
-    private static final String SQL_FIND_BY_ID = "SELECT * FROM EP_USERS WHERE USER_ID = ?";
-    private static final String SQL_FIND_BY_EMAIL = "SELECT * FROM EP_USERS WHERE EMAIL = ?";
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -28,6 +24,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Integer create(String firstName, String lastName, String email, String password) throws EpAuthException {
+        final String SQL_CREATE = "INSERT INTO EP_USERS(USER_ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD) values(NEXTVAL('EP_USERS_SEQ'), ?, ?, ?, ?)";
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt(10));
         try {
             KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -47,6 +44,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User findByEmailAndPassword(String email, String password) throws EpAuthException {
+        final String SQL_FIND_BY_EMAIL = "SELECT * FROM EP_USERS WHERE EMAIL = ?";
         try {
             User user = jdbcTemplate.queryForObject(SQL_FIND_BY_EMAIL, new Object[]{email}, userRowMapper);
             if (!BCrypt.checkpw(password, user.getPassword())) {
@@ -60,11 +58,13 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Integer getCountByEmail(String email) {
+        final String SQL_COUNT_BY_EMAIL = "SELECT COUNT(*) FROM EP_USERS WHERE EMAIL = ?";
         return jdbcTemplate.queryForObject(SQL_COUNT_BY_EMAIL, new Object[]{email}, Integer.class);
     }
 
     @Override
     public User findById(Integer userId) {
+        final String SQL_FIND_BY_ID = "SELECT * FROM EP_USERS WHERE USER_ID = ?";
         return jdbcTemplate.queryForObject(SQL_FIND_BY_ID, new Object[]{userId}, userRowMapper);
     }
 
